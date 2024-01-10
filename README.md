@@ -29,7 +29,7 @@ Install these prerequisites to follow along with the tutorial. See free video tu
 
 
 ## Step 1. Clone the project
-`git clone https://github.com/Daltonic/hardhat_ethersjs_next_starter_app <PROJECT NAME>`
+`git clone https://https://github.com/Anton1636/Answer-To-Earn <PROJECT NAME>`
 
 ## Step 2. Install dependencies
 ```sh

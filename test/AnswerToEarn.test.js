@@ -13,7 +13,7 @@ describe('Contracts', () => {
   const description = `I have a string variable in Python, and I want to convert
     it to lowercase. What is the best way to achieve this?
     Are there any built-in functions or methods available for this task?`
-  const tags = 'python, string, lowercase'
+  const tags = 'java, string, lowercase'
   const prize = 0.1
 
   let contract, result

@@ -32,3 +32,25 @@ export interface QuestionProp {
   tags: string[]
   prize: number
 }
+
+export interface QuestionParams {
+  title: string
+  description: string
+  tags: string
+  prize: string
+}
+
+export interface GlobalState {
+  wallet: string | null
+  answerModal: string | null
+  questionModal: string | null
+  questionUpdateModal: string | null
+  questionDeleteModal: string | null
+  questions: QuestionProp[]
+  question: QuestionProp | null
+  answers: AnswerProp[]
+}
+
+export interface RootState {
+  globalStates: GlobalState
+}
