@@ -1,13 +1,23 @@
-import Head from 'next/head'
-import Header from '@/components/Header'
-import Banner from '@/components/Banner'
-import Questions from '@/components/Questions'
-import { generateQuestions } from '@/utils/helper'
-import { QuestionProp } from '@/utils/interfaces'
-import Empty from '@/components/Empty'
 import AddQuestion from '@/components/AddQuestion'
+import Banner from '@/components/Banner'
+import Empty from '@/components/Empty'
+import Header from '@/components/Header'
+import Questions from '@/components/Questions'
+import { getQuestions } from '@/services/blockchain'
+import { globalActions } from '@/store/globalSlices'
+import { QuestionProp, RootState } from '@/utils/interfaces'
+import Head from 'next/head'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 
-export default function Home({ questions }: { questions: QuestionProp[] }) {
+export default function Home({ questionsData }: { questionsData: QuestionProp[] }) {
+  const { questions } = useSelector((states: RootState) => states.globalStates)
+  const dispatch = useDispatch()
+  const { setQuestions } = globalActions
+
+  useEffect(() => {
+    dispatch(setQuestions(questionsData))
+  }, [dispatch, setQuestions, questionsData])
   return (
     <div>
       <Head>
@@ -15,9 +25,9 @@ export default function Home({ questions }: { questions: QuestionProp[] }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="w-screen pb-20 radial-gradient">
+      <main className="min-h-screen w-screen pb-20 radial-gradient">
         <Header />
-        <Banner />
+        <Banner questions={questions} />
         {questions.length > 0 ? <Questions questions={questions} /> : <Empty />}
         <AddQuestion />
       </main>
@@ -26,8 +36,8 @@ export default function Home({ questions }: { questions: QuestionProp[] }) {
 }
 
 export const getServerSideProps = async () => {
-  const data = generateQuestions(4)
+  const data = await getQuestions()
   return {
-    props: { questions: JSON.parse(JSON.stringify(data)) },
+    props: { questionsData: JSON.parse(JSON.stringify(data)) },
   }
 }

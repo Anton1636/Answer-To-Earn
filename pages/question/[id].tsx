@@ -1,23 +1,43 @@
-import Head from 'next/head'
-import { MdOutlineArrowBackIosNew } from 'react-icons/md'
-import Header from '@/components/Header'
-import React from 'react'
-import Details from '@/components/Details'
-import { generateAnswers, generateQuestions } from '@/utils/helper'
-import { AnswerProp, QuestionProp } from '@/utils/interfaces'
-import Link from 'next/link'
+import AddComment from '@/components/AddComment'
 import Answers from '@/components/Answers'
+import DeleteQuestion from '@/components/DeleteQuestion'
+import Details from '@/components/Details'
+import Header from '@/components/Header'
+import UpdateQuestion from '@/components/UpdateQuestion'
+import { getAnswers, getQuestion } from '@/services/blockchain'
+import { globalActions } from '@/store/globalSlices'
+import { AnswerProp, QuestionProp, RootState } from '@/utils/interfaces'
+import { GetServerSidePropsContext } from 'next'
+import Head from 'next/head'
+import Link from 'next/link'
+import { useEffect } from 'react'
 import { BiNetworkChart } from 'react-icons/bi'
 import { BsFillTrophyFill } from 'react-icons/bs'
-import AddComment from '@/components/AddComment'
+import { MdOutlineArrowBackIosNew } from 'react-icons/md'
+import { useDispatch, useSelector } from 'react-redux'
 
 export default function Question({
-  question,
-  answers,
+  questionData,
+  answersData,
 }: {
-  question: QuestionProp
-  answers: AnswerProp[]
+  questionData: QuestionProp
+  answersData: AnswerProp[]
 }) {
+  const dispatch = useDispatch()
+  const { setQuestion, setAnswers, setAnswerModal } = globalActions
+  const { question, answers, wallet } = useSelector((states: RootState) => states.globalStates)
+
+  useEffect(() => {
+    dispatch(setQuestion(questionData))
+    dispatch(setAnswers(answersData))
+
+    if (wallet) {
+      getAnswers(questionData.id).then((answersX) => {
+        answersX.length > 0 && dispatch(setAnswers(answersX))
+      })
+    }
+  }, [dispatch, questionData, answersData, setQuestion, setAnswers, wallet])
+
   return (
     <div>
       <Head>
@@ -25,7 +45,7 @@ export default function Question({
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main className="w-screen radial-gradient">
+      <main className="min-h-screen w-screen radial-gradient">
         <Header />
 
         <div className="mt-16 sm:mt-9 px-3 sm:px-10">
@@ -43,12 +63,15 @@ export default function Question({
 
           <hr className="bottom border-[#212D4A] w-full my-7" />
 
-          <button
-            className="text-sm bg-blue-600 rounded-full w-[150px] h-[48px] text-white
+          {wallet && (
+            <button
+              className="text-sm bg-blue-600 rounded-full w-[150px] h-[48px] text-white
             right-2 sm:right-10 hover:bg-blue-700  transition-colors duration-300"
-          >
-            Add Answer
-          </button>
+              onClick={() => dispatch(setAnswerModal('scale-100'))}
+            >
+              Add Answer
+            </button>
+          )}
 
           <div className="flex justify-between items-center font-bold text-sm text-[#BBBBBB] mt-6">
             <div className="flex space-x-2 items-center h-[24px]">
@@ -58,29 +81,41 @@ export default function Question({
           </div>
 
           {answers.length > 0 ? (
-            <Answers answers={answers} />
+            <Answers answers={answers} questionData={question} />
           ) : (
             <div className="flex flex-col mt-10 items-center space-y-4">
               <BsFillTrophyFill className="text-[#525F80]" size={40} />
               <p className="text-[#BBBBBB]">Be the first one to drop an answer.</p>
             </div>
           )}
-
-          <AddComment />
         </div>
       </main>
+
+      <AddComment questionData={question} />
+      <UpdateQuestion questionData={question} />
+      <DeleteQuestion questionData={question} />
     </div>
   )
 }
 
-export const getServerSideProps = async () => {
-  const questionData = generateQuestions(1)
-  const answersData = generateAnswers(4)
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+  const { id } = context.query
+  const questionId = typeof id === 'string' ? parseInt(id, 10) : undefined
+  if (typeof questionId !== 'number') {
+    return {
+      props: {
+        error: 'Invalid question ID',
+      },
+    }
+  }
+
+  const questionData = await getQuestion(questionId)
+  const answersData = await getAnswers(questionId)
 
   return {
     props: {
-      question: JSON.parse(JSON.stringify(questionData[0])),
-      answers: JSON.parse(JSON.stringify(answersData)),
+      questionData: JSON.parse(JSON.stringify(questionData)),
+      answersData: JSON.parse(JSON.stringify(answersData)),
     },
   }
 }

@@ -16,6 +16,7 @@ export interface AnswerProp {
   owner: string
   deleted: boolean
   created: number
+  updated: number
 }
 
 export interface QuestionProp {
@@ -26,11 +27,11 @@ export interface QuestionProp {
   winner: string
   paidout: boolean
   deleted: boolean
-  updated: number
+  updated: string
   created: number
   answers: number
   tags: string[]
-  prize: number
+  prize: string
 }
 
 export interface QuestionParams {
