@@ -27,7 +27,7 @@ export default function Home({ questionsData }: { questionsData: QuestionProp[] 
 
       <main className="min-h-screen w-screen pb-20 radial-gradient">
         <Header />
-        <Banner questions={questions} />
+        <Banner />
         {questions.length > 0 ? <Questions questions={questions} /> : <Empty />}
         <AddQuestion />
       </main>

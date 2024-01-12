@@ -27,7 +27,7 @@ export interface QuestionProp {
   winner: string
   paidout: boolean
   deleted: boolean
-  updated: string
+  updated: number
   created: number
   answers: number
   tags: string[]
@@ -43,6 +43,7 @@ export interface QuestionParams {
 
 export interface GlobalState {
   wallet: string | null
+  owner: string | null
   answerModal: string | null
   questionModal: string | null
   questionUpdateModal: string | null

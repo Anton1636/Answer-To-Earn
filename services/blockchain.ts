@@ -5,7 +5,7 @@ import { globalActions } from '@/store/globalSlices'
 import { AnswerProp, QuestionParams, QuestionProp } from '@/utils/interfaces'
 import { ethers } from 'ethers'
 
-const { setWallet, setAnswers, setQuestion, setQuestions } = globalActions
+const { setWallet, setAnswers, setQuestion, setQuestions, setOwner } = globalActions
 const ContractAddress = address.address
 const ContractAbi = abi.abi
 let ethereum: any
@@ -57,6 +57,7 @@ const checkWallet = async () => {
 
     if (accounts?.length) {
       store.dispatch(setWallet(accounts[0]))
+      await getOwner()
     } else {
       store.dispatch(setWallet(''))
       reportError('Please connect wallet, no accounts found.')
@@ -92,6 +93,30 @@ const deleteQuestion = async (id: number) => {
     const question = await getQuestion(id)
 
     store.dispatch(setQuestion(question))
+    return Promise.resolve(tx)
+  } catch (error) {
+    reportError(error)
+    return Promise.reject(error)
+  }
+}
+
+const createAnswer = async (id: number, answer: string) => {
+  if (!ethereum) {
+    reportError('Please install Metamask')
+    return Promise.reject(new Error('Metamask not installed'))
+  }
+
+  try {
+    const contract = await getEthereumContract()
+    const tx = await contract.addAnswer(id, answer)
+
+    await tx.wait()
+    const question = await getQuestion(id)
+    const answers = await getAnswers(id)
+
+    store.dispatch(setQuestion(question))
+    store.dispatch(setAnswers(answers))
+
     return Promise.resolve(tx)
   } catch (error) {
     reportError(error)
@@ -145,10 +170,44 @@ const updateQuestion = async (id: number, data: QuestionParams) => {
   }
 }
 
+const payWinner = async (qid: number, id: number) => {
+  if (!ethereum) {
+    reportError('Please install Metamask')
+    return Promise.reject(new Error('Metamask not installed'))
+  }
+
+  try {
+    const contract = await getEthereumContract()
+    const tx = await contract.payWinner(qid, id)
+
+    await tx.wait()
+    const question = await getQuestion(id)
+    const answers = await getAnswers(id)
+
+    store.dispatch(setQuestion(question))
+    store.dispatch(setAnswers(answers))
+
+    return Promise.resolve(tx)
+  } catch (error) {
+    reportError(error)
+    return Promise.reject(error)
+  }
+}
+
 const getAnswers = async (id: number): Promise<AnswerProp[]> => {
   const contract = await getEthereumContract()
   const answers = await contract.getAnswers(id)
   return structureAnswers(answers) || []
+}
+
+const getOwner = async () => {
+  const contract = await getEthereumContract()
+  const owner = await contract.owner()
+  store.dispatch(setOwner(owner.toLowerCase()))
+}
+
+const reportError = (error: any) => {
+  console.log(error)
 }
 
 const structureAnswers = (answers: any[]): AnswerProp[] =>
@@ -163,10 +222,6 @@ const structureAnswers = (answers: any[]): AnswerProp[] =>
       updated: Number(answer.updated),
     }))
     .sort((a, b) => b.updated - a.updated)
-
-const reportError = (error: any) => {
-  console.log(error)
-}
 
 const structureQuestions = (questions: any[]): QuestionProp[] =>
   questions
@@ -189,10 +244,12 @@ const structureQuestions = (questions: any[]): QuestionProp[] =>
 export {
   checkWallet,
   connectWallet,
+  createAnswer,
   createQuestion,
   deleteQuestion,
   getAnswers,
   getQuestion,
   getQuestions,
+  payWinner,
   updateQuestion,
 }

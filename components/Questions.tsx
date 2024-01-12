@@ -4,8 +4,8 @@ import Link from 'next/link'
 import React from 'react'
 import { FaEthereum } from 'react-icons/fa'
 import Identicon from 'react-identicons'
-import { Tags, TagsSm } from './Tags'
 import Moment from 'react-moment'
+import { Tags, TagsSm } from './Tags'
 
 const Questions: React.FC<{ questions: QuestionProp[] }> = ({ questions }) => {
   return (
@@ -18,13 +18,23 @@ const Questions: React.FC<{ questions: QuestionProp[] }> = ({ questions }) => {
 
             <div className="flex justify-between items-center">
               <div className="flex items-center space-x-3 flex-wrap ">
-                <div
-                  className="flex space-x-1 border border-pink-500 h-[32px] w-[90px]
+                {question.paidout ? (
+                  <div
+                    className="flex space-x-1 border border-green-400 h-[32px] w-[90px]
+                  justify-center items-center rounded-md text-green-400 cursor-pointer"
+                  >
+                    <FaEthereum className="w-[10px] h-[15px]" />
+                    <p>{question.prize} Paid</p>
+                  </div>
+                ) : (
+                  <div
+                    className="flex space-x-1 border border-pink-500 h-[32px] w-[90px]
                   justify-center items-center rounded-md text-pink-500 cursor-pointer"
-                >
-                  <FaEthereum className="w-[10px] h-[15px]" />
-                  <p>{question.prize} prize</p>
-                </div>
+                  >
+                    <FaEthereum className="w-[10px] h-[15px]" />
+                    <p>{question.prize} prize</p>
+                  </div>
+                )}
 
                 <Tags tags={question.tags} />
                 <TagsSm tags={question.tags} />
@@ -34,9 +44,7 @@ const Questions: React.FC<{ questions: QuestionProp[] }> = ({ questions }) => {
                     {question.answers === 0 ? 'No answer yet' : `${question.answers} answer(s)`}
                   </p>
                   <p>/</p>
-                  <span>
-                    <Moment fromNow>{question.created}</Moment>
-                  </span>
+                  <Moment fromNow>{question.created}</Moment>
                 </div>
               </div>
 
@@ -51,16 +59,13 @@ const Questions: React.FC<{ questions: QuestionProp[] }> = ({ questions }) => {
                 </p>
               </div>
             </div>
-
             <div className="flex flex-col space-y-3 sm:hidden">
               <div className=" flex items-center gap-2">
                 <p className="">
                   {question.answers === 0 ? 'No answer yet' : `${question.answers} answer(s)`}
                 </p>
                 <p>/</p>
-                <span>
-                  <Moment fromNow>{question.created}</Moment>
-                </span>
+                <Moment fromNow>{question.created}</Moment>
               </div>
 
               <div className=" space-x-2  flex items-center">

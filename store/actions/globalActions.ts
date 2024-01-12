@@ -5,6 +5,9 @@ export const globalActions = {
   setWallet: (state: GlobalState, action: PayloadAction<string>) => {
     state.wallet = action.payload
   },
+  setOwner: (state: GlobalState, action: PayloadAction<string>) => {
+    state.owner = action.payload
+  },
   setAnswerModal: (state: GlobalState, action: PayloadAction<string>) => {
     state.answerModal = action.payload
   },
